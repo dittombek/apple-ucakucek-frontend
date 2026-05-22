@@ -7,12 +7,58 @@
 
 import SwiftUI
 
-struct GenderSelectedView: View {
+struct GenderSelectionView: View {
+    @Binding var selectedGender: String
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        VStack(spacing: 16) {
+            Text("What is your gender?")
+                .font(.title)
+                .fontDesign(.serif)
+                .fontWeight(.bold)
+                .multilineTextAlignment(.center)
+                .padding(.top, 30)
+            
+            HStack(spacing: 16) {
+                GenderButton(title: "Male",icon: "manIcon", isSelected: selectedGender == "Male") { selectedGender = "Male" }
+                GenderButton(title: "Female", icon: "womanIcon", isSelected: selectedGender == "Female") { selectedGender = "Female" }
+            }
+            .padding(.horizontal, 32)
+            
+            Spacer()
+        }
+    }
+}
+
+struct GenderButton: View {
+    let title: String;
+    let icon: String;
+    let isSelected: Bool;
+    let action: () -> Void
+    var body: some View {
+        Button(action: action) {
+            HStack {
+                Image(icon)
+                    .renderingMode(.template)
+                Text(title)
+            }
+            .font(.headline)
+            .foregroundColor(isSelected ? .white : .gray)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 16)
+            .background(isSelected ? Color(.nightSnow500) : .white)
+            .cornerRadius(20)
+        }
     }
 }
 
 #Preview {
-    GenderSelectedView()
+    ZStack {
+        LinearGradient(
+            colors: [Color.white, SetupTheme.bgColor],
+            startPoint: .top,
+            endPoint: .bottom
+        ).ignoresSafeArea()
+        
+     GenderSelectionView(selectedGender: .constant("Male")) }
 }

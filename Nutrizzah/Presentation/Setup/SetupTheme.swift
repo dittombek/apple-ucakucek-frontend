@@ -7,9 +7,11 @@
 
 import SwiftUI
 
-struct OnBoardingTheme {
-    static let bgColor = Color.bg
-    static let primaryGreen = Color.primaryGreen
+struct SetupTheme {
+    static let bgColor = Color.potOfCream400
+    static let primaryGreen = Color.machaMecha400
+    static let featureBg = Color.machaMecha100
+    static let rowBgFeature = Color.machaMecha50
     static let fieldBg = Color.white
     static let titleFont = Font.system(size: 28, weight: .bold, design: .rounded)
 }
