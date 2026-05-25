@@ -9,6 +9,10 @@ import SwiftUI
 
 @main
 struct NutrizzahApp: App {
+    init() {
+    UserDefaults.standard.removeObject(forKey: "isSetupDone")
+}
+
     var body: some Scene {
         WindowGroup {
             ContentView()
