@@ -28,7 +28,7 @@ struct ProfilePictureView: View {
                 
                 Image(systemName: "camera.fill")
                     .padding(10)
-                    .background(SetupTheme.primaryGreen)
+                    .background(Color.machaMecha400)
                     .foregroundColor(.white)
                     .clipShape(Circle())
             }
@@ -42,7 +42,7 @@ struct ProfilePictureView: View {
 #Preview {
     ZStack {
         LinearGradient(
-            colors: [Color.white, SetupTheme.bgColor],
+            colors: [Color.white, Color.potOfCream400],
             startPoint: .top,
             endPoint: .bottom
         ).ignoresSafeArea()

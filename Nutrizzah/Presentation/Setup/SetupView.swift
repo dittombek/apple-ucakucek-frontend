@@ -42,14 +42,14 @@ struct SetupView: View {
                 Text(step == 0 ? "Get started" : "Next")
                     .font(.headline).foregroundColor(.white)
                     .frame(maxWidth: .infinity).padding(.vertical, 16)
-                    .background(SetupTheme.primaryGreen)
+                    .background(Color.machaMecha400)
                     .clipShape(Capsule())
             }
             .padding(.horizontal, 24).padding(.bottom, 20)
             .shadow(color: .black.opacity(0.1), radius: 2, x: 4, y: 4)
         }
         .background(LinearGradient(
-            colors: [Color.white, SetupTheme.bgColor],
+            colors: [Color.white, Color.potOfCream400],
             startPoint: .top,
             endPoint: .bottom
         ))

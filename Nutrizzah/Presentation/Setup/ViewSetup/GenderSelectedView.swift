@@ -55,7 +55,7 @@ struct GenderButton: View {
 #Preview {
     ZStack {
         LinearGradient(
-            colors: [Color.white, SetupTheme.bgColor],
+            colors: [Color.white, Color.potOfCream400],
             startPoint: .top,
             endPoint: .bottom
         ).ignoresSafeArea()
