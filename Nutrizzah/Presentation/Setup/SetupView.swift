@@ -8,118 +8,51 @@
 import SwiftUI
 
 struct SetupView: View {
+    @State private var step = 0
+    @State private var name = ""
+    @State private var gender = ""
+    @State private var age = ""
+    @State private var height = ""
+    @State private var weight = ""
+    
     var body: some View {
-        
         VStack {
-
+            HeaderView(currentStep: step, totalSteps: 6) { if step > 0 { step -= 1 } }
+            
             Spacer()
-
-            // CONTENT
-            VStack(spacing: 32) {
-
-                VStack(spacing: 8) {
-
-                    Text("Quick Setup")
-                        .font(.system(size: 12))
-                        .opacity(0.6)
-
-                    Text("A few quick questions, then you're in.")
-                        .font(.system(size: 34))
-                        .multilineTextAlignment(.center)
-                        .bold()
-
-                    Text("We need a bit about you to nail your daily target. Takes 60 seconds, promise.")
-                        .font(.system(size: 16))
-                        .multilineTextAlignment(.center)
-                        .opacity(0.6)
+            
+            ZStack {
+                switch step {
+                case 0: IntroView()
+                case 1: NameEntryView(name: $name)
+                case 2: GenderSelectionView(selectedGender: $gender)
+                case 3: MeasurementView(title: "How old are you?", value: $age)
+                case 4: MeasurementView(title: "What is your height?", value: $height, unit: "cm")
+                case 5: MeasurementView(title: "What is your weight?", value: $weight, unit: "kg")
+                case 6: ProfilePictureView()
+                default: EmptyView()
                 }
-
-                VStack(spacing: 16) {
-
-                    HStack {
-
-                        Image(systemName: "chart.pie")
-                            .font(.system(size: 16, weight: .medium))
-                            .frame(width: 32, height: 32)
-                            .background(Color.lightGreen)
-                            .cornerRadius(10)
-
-                        Text("Personalized calorie target")
-                            .font(.system(size: 13))
-
-
-                        Spacer()
-                    }
-                    .padding(8)
-                    .background(Color.veryLightGreen)
-                    .cornerRadius(16)
-
-                    
-                    HStack {
-
-                        Image(systemName: "tree")
-                            .font(.system(size: 16, weight: .medium))
-                            .frame(width: 32, height: 32)
-                            .background(Color.lightGreen)
-                            .cornerRadius(10)
-
-                        Text("Nutrient goals")
-                            .font(.system(size: 13))
-
-                        Spacer()
-                    }
-                    .padding(8)
-                    .background(Color.veryLightGreen)
-                    .cornerRadius(16)
-
-                    
-                    HStack {
-
-                        Image(systemName: "trophy")
-                            .font(.system(size: 16, weight: .medium))
-                            .frame(width: 32, height: 32)
-                            .background(Color.lightGreen)
-                            .cornerRadius(10)
-
-                        Text("Tailored to your goals")
-                            .font(.system(size: 13))
-
-                        Spacer()
-                    }
-                    .padding(8)
-                    .background(Color.veryLightGreen)
-                    .cornerRadius(16)
-                }
-                .padding(.horizontal, 16)
             }
             .padding(.horizontal, 24)
-
+            .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
+            
             Spacer()
-
-            // BUTTON
-            Button {
-
-            } label: {
-
-                Text("Get started")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 52)
-                    .background(Color.matchaGreen)
-                    .cornerRadius(32)
+            
+            Button(action: { withAnimation { if step < 6 { step += 1 } } }) {
+                Text(step == 0 ? "Get started" : "Next")
+                    .font(.headline).foregroundColor(.white)
+                    .frame(maxWidth: .infinity).padding(.vertical, 16)
+                    .background(Color.machaMecha400)
+                    .clipShape(Capsule())
             }
-            .padding(.horizontal, 24)
-            .padding(.bottom, 32)
+            .padding(.horizontal, 24).padding(.bottom, 20)
+            .shadow(color: .black.opacity(0.1), radius: 2, x: 4, y: 4)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(
-            LinearGradient(
-                colors: [.gradien1, .gradien2],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        )
+        .background(LinearGradient(
+            colors: [Color.white, Color.potOfCream400],
+            startPoint: .top,
+            endPoint: .bottom
+        ))
     }
 }
 
