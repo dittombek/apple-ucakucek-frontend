@@ -8,8 +8,14 @@
 import SwiftUI
 
 struct ContentView: View {
+    @AppStorage("isSetupDone") private var isSetupDone = false
+
     var body: some View {
-        MainTabView()
+        if isSetupDone {
+            MainTabView()
+        } else {
+            SetupView(isSetupDone: $isSetupDone)
+        }
     }
 }
 
