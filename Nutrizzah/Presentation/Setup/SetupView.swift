@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct SetupView: View {
+    @Binding var isSetupDone: Bool
     @State private var step = 0
     @State private var name = ""
     @State private var gender = ""
@@ -38,8 +39,8 @@ struct SetupView: View {
             
             Spacer()
             
-            Button(action: { withAnimation { if step < 6 { step += 1 } } }) {
-                Text(step == 0 ? "Get started" : "Next")
+            Button(action: { withAnimation { if step < 6 { step += 1 } else { isSetupDone = true } } }) {
+                Text(step == 0 ? "Get started" : step == 6 ? "Finish" : "Next")
                     .font(.headline).foregroundColor(.white)
                     .frame(maxWidth: .infinity).padding(.vertical, 16)
                     .background(Color.machaMecha400)
@@ -57,5 +58,5 @@ struct SetupView: View {
 }
 
 #Preview {
-    SetupView()
+    SetupView(isSetupDone: .constant(false))
 }
