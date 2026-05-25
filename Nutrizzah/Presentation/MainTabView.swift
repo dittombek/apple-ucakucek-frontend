@@ -16,7 +16,7 @@ struct MainTabView: View {
                 HomeView()
                     .tag(0)
                     .toolbar(.hidden, for: .tabBar)
-                Text("Profile")
+                ProfileView()
                     .tag(1)
                     .toolbar(.hidden, for: .tabBar)
             }

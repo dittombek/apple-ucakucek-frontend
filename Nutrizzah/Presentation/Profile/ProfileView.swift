@@ -15,47 +15,6 @@ struct DailyCalorie: Identifiable {
     let calories: Int
 }
 
-// MARK: - Main Orchestrator (Tab View Native)
-struct MainTabView: View {
-    // Warna hijau utama dari desain
-    let primaryGreen = Color(red: 0.60, green: 0.68, blue: 0.48)
-    
-    var body: some View {
-        TabView {
-            // TAB 1: Journal (Placeholder)
-            NavigationStack {
-                Text("Halaman Journal")
-                    .navigationTitle("Journal")
-            }
-            .tabItem {
-                Label("Journal", systemImage: "clipboard.list")
-            }
-            
-            // TAB 2: Profile (Sesuai Desain)
-            NavigationStack {
-                ProfileView()
-                    // HIG: Aksi utama (Tambah) diletakkan di Toolbar kanan atas
-                    .toolbar {
-                        ToolbarItem(placement: .navigationBarTrailing) {
-                            Button(action: {
-                                print("Tombol Add (+) ditekan")
-                            }) {
-                                Image(systemName: "plus.circle.fill")
-                                    .foregroundColor(primaryGreen)
-                                    .font(.title2)
-                            }
-                        }
-                    }
-            }
-            .tabItem {
-                Label("Profile", systemImage: "person.fill")
-            }
-        }
-        // Mengubah warna ikon tab yang aktif menjadi hijau
-        .tint(primaryGreen)
-    }
-}
-
 // MARK: - Profile Screen
 struct ProfileView: View {
     // State Data User
@@ -262,5 +221,5 @@ struct MetricItem: View {
 
 // MARK: - Preview
 #Preview {
-    MainTabView()
+    ProfileView()
 }
