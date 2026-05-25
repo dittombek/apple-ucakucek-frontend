@@ -51,10 +51,6 @@ struct RevealTargetView: View {
             // Background & Aura (mengikuti custom background-mu di screenshot)
             darkBgGreen.ignoresSafeArea()
             
-//            if showAura {
-//                EpicAuraRaysView().transition(.opacity)
-//            }
-            
             VStack {
                 Spacer()
                 
@@ -159,59 +155,20 @@ struct RevealTargetView: View {
     }
 }
 
-// MARK: - Komponen Sinar Aura Berputar
-//struct EpicAuraRaysView: View {
-//    @State private var isSpinning = false
-//    
-//    // Membuat warna gradien emas & cyan ala Legendary/Epic Card
-//    let auraColors = Gradient(colors: [
-//        Color.yellow.opacity(0.8),
-//        Color.clear,
-//        Color.white.opacity(0.8),
-//        Color.clear,
-//        Color.cyan.opacity(0.6),
-//        Color.clear
-//    ])
-//    
-//    var body: some View {
-//        ZStack {
-//            // Sinar Matahari (Sunburst) dari tengah
-//            AngularGradient(gradient: auraColors, center: .center)
-//                .frame(width: 1000, height: 1000)
-//                .rotationEffect(.degrees(isSpinning ? 360 : 0))
-//                .onAppear {
-//                    // Berputar terus menerus
-//                    withAnimation(.linear(duration: 6).repeatForever(autoreverses: false)) {
-//                        isSpinning = true
-//                    }
-//                }
-//            
-//            // Glow radial di tengah supaya kartunya makin bersinar
-//            RadialGradient(
-//                gradient: Gradient(colors: [Color.white, Color.white.opacity(0.5), .clear]),
-//                center: .center,
-//                startRadius: 50,
-//                endRadius: 300
-//            )
-//            .opacity(0.8)
-//        }
-//    }
-//}
-
 // MARK: - Komponen Sisi Depan
 struct CongratsCardFace: View {
     var body: some View {
-        VStack(spacing: 20) {
-            Text("Congratulations!")
-                .font(.system(size: 28, weight: .bold, design: .serif))
-                .padding(.top, 40)
-            
-            Text("Tap to reveal your target!") // Dibuat lebih mengajak
-                .font(.subheadline)
-                .fontWeight(.bold)
-                .foregroundColor(Color(red: 0.60, green: 0.68, blue: 0.48))
-            
-            Spacer()
+        VStack(spacing: 60) {
+            VStack {
+                Text("Congratulations!")
+                    .font(.system(size: 28, weight: .bold, design: .serif))
+                    .padding(.top, 40)
+                
+                Text("Tap to reveal your target!") // Dibuat lebih mengajak
+                    .font(.subheadline)
+                    .fontWeight(.bold)
+                    .foregroundColor(Color(red: 0.60, green: 0.68, blue: 0.48))
+            }
             
             // Mascot
             ZStack {
@@ -219,6 +176,16 @@ struct CongratsCardFace: View {
                 Text("🍠").font(.system(size: 80))
             }
             
+            Button(action: { print("Done di-tap") }) {
+                Text("Done")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(Color.matchaMecha700)
+                    .clipShape(Capsule())
+            }
+            .padding(.horizontal, 24)
             Spacer()
         }
     }
