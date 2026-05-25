@@ -28,7 +28,7 @@ struct HeaderView: View {
                 HStack(spacing: 6) {
                     ForEach(1...totalSteps, id: \.self) { i in
                         RoundedRectangle(cornerRadius: 2)
-                            .fill(i <= currentStep ? SetupTheme.primaryGreen : Color.gray.opacity(0.2))
+                            .fill(i <= currentStep ? Color.machaMecha400 : Color.gray.opacity(0.2))
                             .frame(width: 25, height: 4)
                     }
                 }

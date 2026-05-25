@@ -42,10 +42,10 @@ struct FeatureRow: View {
     var body: some View {
         HStack(spacing: 16) {
             Image(systemName: icon)
-                .foregroundColor(SetupTheme.primaryGreen)
+                .foregroundColor(Color.machaMecha400)
                 .frame(width: 24, height: 24)
                 .padding(5)
-                .background(SetupTheme.featureBg)
+                .background(Color.machaMecha100)
                 .cornerRadius(10)
             Text(text).font(.body)
         }
@@ -55,7 +55,7 @@ struct FeatureRow: View {
             LinearGradient(
                 gradient: Gradient(stops: [
                     .init(color: .white, location: 0.0),
-                    .init(color: SetupTheme.rowBgFeature, location: 0.1)
+                    .init(color: Color.machaMecha50, location: 0.1)
                 ]),
                 startPoint: .trailing,
                 endPoint: .leading
@@ -68,7 +68,7 @@ struct FeatureRow: View {
 #Preview {
     ZStack {
         LinearGradient(
-            colors: [Color.white, SetupTheme.bgColor],
+            colors: [Color.white, Color.potOfCream400],
             startPoint: .top,
             endPoint: .bottom
         ).ignoresSafeArea()

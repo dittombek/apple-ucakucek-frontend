@@ -34,7 +34,7 @@ struct MeasurementView: View {
                 }
             }
             .padding()
-            .background(SetupTheme.fieldBg)
+            .background(Color.white)
             .cornerRadius(20)
             .padding(.top, 20)
             .shadow(color: .black.opacity(0.1), radius: 2, x: 4, y: 4)
@@ -48,7 +48,7 @@ struct MeasurementView: View {
 #Preview("Age") {
     ZStack {
         LinearGradient(
-            colors: [Color.white, SetupTheme.bgColor],
+            colors: [Color.white, Color.potOfCream400],
             startPoint: .top,
             endPoint: .bottom
         ).ignoresSafeArea()
