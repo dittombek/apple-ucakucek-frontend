@@ -10,8 +10,8 @@ import SwiftUI
 @main
 struct NutrizzahApp: App {
     init() {
-    UserDefaults.standard.removeObject(forKey: "isSetupDone")
-}
+        UserDefaults.standard.removeObject(forKey: "userId")
+    }
 
     var body: some Scene {
         WindowGroup {

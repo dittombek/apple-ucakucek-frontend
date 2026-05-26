@@ -8,28 +8,22 @@
 import SwiftUI
 
 struct SetupView: View {
-    @Binding var isSetupDone: Bool
-    @State private var step = 0
-    @State private var name = ""
-    @State private var gender = ""
-    @State private var age = ""
-    @State private var height = ""
-    @State private var weight = ""
+    @StateObject private var viewModel = SetupViewModel()
     
     var body: some View {
         VStack {
-            HeaderView(currentStep: step, totalSteps: 6) { if step > 0 { step -= 1 } }
+            HeaderView(currentStep: viewModel.step, totalSteps: 6) { viewModel.prevStep() }
             
             Spacer()
             
             ZStack {
-                switch step {
+                switch viewModel.step {
                 case 0: IntroView()
-                case 1: NameEntryView(name: $name)
-                case 2: GenderSelectionView(selectedGender: $gender)
-                case 3: MeasurementView(title: "How old are you?", value: $age)
-                case 4: MeasurementView(title: "What is your height?", value: $height, unit: "cm")
-                case 5: MeasurementView(title: "What is your weight?", value: $weight, unit: "kg")
+                case 1: NameEntryView(name: $viewModel.name)
+                case 2: GenderSelectionView(selectedGender: $viewModel.gender)
+                case 3: MeasurementView(title: "How old are you?", value: $viewModel.age)
+                case 4: MeasurementView(title: "What is your height?", value: $viewModel.height, unit: "cm")
+                case 5: MeasurementView(title: "What is your weight?", value: $viewModel.weight, unit: "kg")
                 case 6: ProfilePictureView()
                 default: EmptyView()
                 }
@@ -39,8 +33,20 @@ struct SetupView: View {
             
             Spacer()
             
-            Button(action: { withAnimation { if step < 6 { step += 1 } else { isSetupDone = true } } }) {
-                Text(step == 0 ? "Get started" : step == 6 ? "Finish" : "Next")
+            Button(action: {
+                if viewModel.step == 6 {
+                    Task {
+                        do {
+                            try await viewModel.createUser()
+                        } catch {
+                            print("Failed to create user: \(error)")
+                        }
+                    }
+                } else {
+                    withAnimation { viewModel.nextStep() }
+                }
+            }) {
+                Text(viewModel.step == 0 ? "Get started" : viewModel.step == 6 ? "Finish" : "Next")
                     .font(.headline).foregroundColor(.white)
                     .frame(maxWidth: .infinity).padding(.vertical, 16)
                     .background(Color.machaMecha400)
@@ -58,5 +64,5 @@ struct SetupView: View {
 }
 
 #Preview {
-    SetupView(isSetupDone: .constant(false))
+    SetupView()
 }
