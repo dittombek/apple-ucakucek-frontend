@@ -25,6 +25,15 @@ struct CreateFoodLogResponse: Codable {
     let nutrition: NutritionLog
 }
 
+struct FoodLogWithCalories: Codable, Identifiable {
+    let id: Int
+    let foodName: String
+    let portion: String
+    let meal: String
+    let date: String
+    let calories: Double
+}
+
 struct CreateFoodLogRequest: Codable {
     let userId: Int
     let foodName: String

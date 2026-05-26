@@ -8,13 +8,16 @@
 import SwiftUI
 
 struct ContentView: View {
+    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
     @AppStorage("userId") private var userId = 0
 
     var body: some View {
         if userId > 0 {
             MainTabView()
-        } else {
+        } else if hasSeenOnboarding {
             SetupView()
+        } else {
+            OnboardingView()
         }
     }
 }

@@ -86,7 +86,8 @@ struct HomeView: View {
                             protein: viewModel.dailyTotal.mineral,
                             proteinGoal: viewModel.target?.mineral ?? 0,
                             fat: 0, fatGoal: 0,
-                            labels: ("Vitamin", "Mineral", nil)
+                            labels: ("Vitamin", "Mineral", nil),
+                            units: ("mg", "mg", "mg")
                         )
                         .containerRelativeFrame(.horizontal)
                         .id(1)
@@ -166,10 +167,10 @@ struct HomeView: View {
                     
                     // MARK: — Meal Sections
                     VStack(spacing: 16) {
-                        MealRow(icon: "sunrise.fill", title: "Breakfast")
-                        MealRow(icon: "sun.max.fill", title: "Lunch")
-                        MealRow(icon: "moon.fill", title: "Dinner")
-                        MealRow(icon: "leaf.fill", title: "Snack")
+                        MealRow(icon: "sunrise.fill", title: "Breakfast", foods: viewModel.foodLogs.filter { $0.meal == "Breakfast" })
+                        MealRow(icon: "sun.max.fill", title: "Lunch", foods: viewModel.foodLogs.filter { $0.meal == "Lunch" })
+                        MealRow(icon: "moon.fill", title: "Dinner", foods: viewModel.foodLogs.filter { $0.meal == "Dinner" })
+                        MealRow(icon: "leaf.fill", title: "Snack", foods: viewModel.foodLogs.filter { $0.meal == "Snack" })
                     }
                     .background(
                         RoundedRectangle(cornerRadius: 14)
@@ -261,13 +262,14 @@ struct MacroDetailCard: View {
     let fat: Double
     let fatGoal: Double
     var labels: (String, String, String?) = ("Carbs", "Protein", "Fat")
+    var units: (String, String, String) = ("g", "g", "g")
 
     var body: some View {
         HStack(spacing: 12) {
-            MacroCard(value: carbs, goal: carbsGoal, label: labels.0)
-            MacroCard(value: protein, goal: proteinGoal, label: labels.1)
+            MacroCard(value: carbs, goal: carbsGoal, label: labels.0, unit: units.0)
+            MacroCard(value: protein, goal: proteinGoal, label: labels.1, unit: units.1)
             if let thirdLabel = labels.2 {
-                MacroCard(value: fat, goal: fatGoal, label: thirdLabel)
+                MacroCard(value: fat, goal: fatGoal, label: thirdLabel, unit: units.2)
             }
         }
         .padding(.horizontal, 4)
@@ -279,16 +281,16 @@ struct MacroCard: View {
     let value: Double
     let goal: Double
     let label: String
+    var unit: String = "g"
 
     var isOver: Bool { goal > 0 && value > goal }
     var progress: Double { goal > 0 ? min(value / goal, 1.0) : 0 }
     var ringColor: Color { isOver ? .darkGreen : .matchaGreen }
 
     private func format(_ v: Double) -> String {
-        if v >= 10   { return "\(Int(v))" }
-        if v >= 1    { return String(format: "%.1f", v) }
-        if v >= 0.01 { return String(format: "%.2f", v) }
-        return String(format: "%.3f", v)
+        let rounded = Int(v.rounded())
+        if rounded == 0 && v > 0 { return String(format: "%.1f", v) }
+        return "\(rounded)"
     }
 
     var body: some View {
@@ -304,7 +306,7 @@ struct MacroCard: View {
                     Text(format(value))
                         .font(.system(size: 18, weight: .semibold))
                         .foregroundColor(isOver ? .darkGreen : .darkGreen)
-                    Text("/\(format(goal))g")
+                    Text("/\(format(goal))\(unit)")
                         .font(.system(size: 10))
                         .foregroundColor(.secondary)
                 }
@@ -327,19 +329,29 @@ struct MacroCard: View {
 struct MealRow: View {
     let icon: String
     let title: String
-    
+    let foods: [FoodLogWithCalories]
+
     var body: some View {
-        HStack(spacing: 14) {
-            Image(systemName: icon)
-                .font(.system(size: 18))
-                .foregroundColor(.matchaGreen)
-                .frame(width: 32)
-            Text(title)
-                .font(.system(size: 16, weight: .medium))
-            Spacer()
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 14) {
+                Image(systemName: icon)
+                    .font(.system(size: 18))
+                    .foregroundColor(.matchaGreen)
+                    .frame(width: 32)
+                Text(title)
+                    .font(.system(size: 16, weight: .medium))
+                Spacer()
+            }
+            if !foods.isEmpty {
+                Text(foods.map { "\($0.foodName) (\(Int($0.calories.rounded())) Cal)" }.joined(separator: ", "))
+                    .font(.system(size: 13))
+                    .foregroundColor(.secondary)
+                    .lineLimit(2)
+                    .padding(.leading, 46)
+            }
         }
         .padding(.horizontal, 8)
-        .padding(.vertical, 8)
+        .padding(.vertical, 10)
         .overlay(RoundedRectangle(cornerRadius: 8)
             .stroke(Color.gray.opacity(0.30), lineWidth: 1))
     }

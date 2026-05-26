@@ -13,10 +13,10 @@ struct FoodLogRemoteDataSource {
         return try JSONDecoder().decode(CreateFoodLogResponse.self, from: data)
     }
 
-    func fetchFoodLogs(userId: Int, date: String) async throws -> [FoodLog] {
+    func fetchFoodLogs(userId: Int, date: String) async throws -> [FoodLogWithCalories] {
         let url = URL(string: "\(baseURL)/food-logs/user/\(userId)?date=\(date)")!
         let (data, _) = try await URLSession.shared.data(from: url)
-        return try JSONDecoder().decode([FoodLog].self, from: data)
+        return try JSONDecoder().decode([FoodLogWithCalories].self, from: data)
     }
 
     func fetchDailyTotal(userId: Int, date: String) async throws -> DailyTotal {

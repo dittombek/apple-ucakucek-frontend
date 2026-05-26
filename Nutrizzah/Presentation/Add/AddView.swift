@@ -117,7 +117,7 @@ struct AddView: View {
                             .background(Capsule().fill(Color.brown))
                     }
                 }
-                .disabled(isSaving)
+                .disabled(isSaving || addedFoods.isEmpty)
                 .alert("Failed to save", isPresented: .constant(saveError != nil)) {
                     Button("OK") { saveError = nil }
                 } message: {

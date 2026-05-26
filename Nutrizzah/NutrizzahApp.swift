@@ -10,7 +10,9 @@ import SwiftUI
 @main
 struct NutrizzahApp: App {
     init() {
-        UserDefaults.standard.removeObject(forKey: "userId")
+        // DEV ONLY: langsung ke homepage dengan userId tertentu
+        UserDefaults.standard.set(5, forKey: "userId")
+        UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
     }
 
     var body: some Scene {
