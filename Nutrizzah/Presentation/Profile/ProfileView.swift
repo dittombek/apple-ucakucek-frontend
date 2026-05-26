@@ -23,20 +23,12 @@ struct ProfileView: View {
     @State private var weight = 69
     @State private var age = 28
     
-    // State Filter Chart
+    // State Filter Chart & Animasi
     @State private var selectedTrend = "7 days"
-    let trendOptions = ["7 days", "30 days", "90 days"]
+    @State private var animateChart = false
+    @State private var selectedDay: String? = nil
     
-    // Data Dummy Chart
-    let chartData: [DailyCalorie] = [
-        DailyCalorie(day: "Sun", calories: 1800),
-        DailyCalorie(day: "Mon", calories: 2000),
-        DailyCalorie(day: "Tue", calories: 1400),
-        DailyCalorie(day: "Wed", calories: 1100),
-        DailyCalorie(day: "Thu", calories: 2300),
-        DailyCalorie(day: "Fri", calories: 1500),
-        DailyCalorie(day: "Sat", calories: 1900)
-    ]
+    let trendOptions = ["7 days", "30 days", "90 days"]
     
     // Tema Warna
     let bgGradient = LinearGradient(
@@ -45,9 +37,40 @@ struct ProfileView: View {
     )
     let primaryGreen = Color(red: 0.60, green: 0.68, blue: 0.48)
     
+    // MARK: - Algoritma Chart Dinamis
+    var currentChartData: [DailyCalorie] {
+        switch selectedTrend {
+        case "7 days":
+            // Data 7 hari (Tanpa dirata-rata)
+            return [
+                DailyCalorie(day: "Sun", calories: 1800),
+                DailyCalorie(day: "Mon", calories: 2000),
+                DailyCalorie(day: "Tue", calories: 1400),
+                DailyCalorie(day: "Wed", calories: 1100),
+                DailyCalorie(day: "Thu", calories: 2300),
+                DailyCalorie(day: "Fri", calories: 1500),
+                DailyCalorie(day: "Sat", calories: 1900)
+            ]
+            
+        case "30 days":
+            // PRO-TIP: Gunakan 28 Hari (Persis 4 Minggu)
+            // Simulasi Data API: 28 hari ke belakang
+            let apiData28Days = (1...28).map { _ in Int.random(in: 1200...2200) }
+            return calculateAverages(from: apiData28Days, daysPerGroup: 7, isBiWeekly: false)
+            
+        case "90 days":
+            // PRO-TIP: Gunakan 84 Hari (Persis 12 Minggu)
+            // Simulasi Data API: 84 hari ke belakang
+            let apiData84Days = (1...84).map { _ in Int.random(in: 1200...2200) }
+            return calculateAverages(from: apiData84Days, daysPerGroup: 14, isBiWeekly: true)
+            
+        default:
+            return []
+        }
+    }
+    
     var body: some View {
         ZStack(alignment: .bottom) {
-            // 1. Latar Belakang Gradien
             bgGradient.ignoresSafeArea()
             
             ScrollView(.vertical, showsIndicators: false) {
@@ -57,7 +80,7 @@ struct ProfileView: View {
                     VStack(spacing: 16) {
                         Text(userName)
                             .font(.system(size: 34, weight: .semibold, design: .serif))
-                            .minimumScaleFactor(0.8) // HIG: Mendukung Dynamic Type
+                            .minimumScaleFactor(0.8)
                             .padding(.top, 20)
                         
                         ZStack {
@@ -65,20 +88,19 @@ struct ProfileView: View {
                                 .fill(Color.pink.opacity(0.3))
                                 .frame(width: 120, height: 120)
                             
-                            Text("🍅") // Placeholder avatar
+                            Text("🍅")
                                 .font(.system(size: 60))
                         }
-                        // HIG: Aksesibilitas VoiceOver
                         .accessibilityElement(children: .ignore)
                         .accessibilityLabel("Profile picture")
                         .padding(.bottom, 32)
                     }
-                    .padding(.bottom, 60) // Ruang untuk efek overlap Metrics Card
+                    .padding(.bottom, 48)
                     
                     // MARK: Bottom Sheet Area
-                    VStack(spacing: 24) {
+                    VStack {
                         
-                        // 2. Metrics Card (Overlapping ke atas)
+                        // 2. Metrics Card
                         HStack(spacing: 0) {
                             MetricItem(title: "Height", value: "\(height)", unit: "cm")
                             Divider().frame(height: 50)
@@ -89,12 +111,12 @@ struct ProfileView: View {
                         .padding(.vertical, 16)
                         .background(Color(red: 0.95, green: 0.96, blue: 0.93))
                         .cornerRadius(16)
-                        .offset(y: -60) // Menarik card ke atas memotong batas background
-                        .padding(.bottom, -40) // Menetralkan spacing yang bergeser
+                        .offset(y: -60)
+                        .padding(.bottom, -40)
                         .padding(.horizontal, 24)
                         
                         // 3. Calories Trend
-                        VStack(alignment: .leading, spacing: 20) {
+                        VStack(alignment: .leading, spacing: 48) {
                             HStack {
                                 Text("Calories trend")
                                     .font(.title3.weight(.bold))
@@ -110,11 +132,11 @@ struct ProfileView: View {
                                 .frame(width: 200)
                             }
                             
-                            // 4. Framework Charts Apple
-                            Chart(chartData) { item in
+                            // 4. Framework Charts Apple (Animated & Interactive)
+                            Chart(currentChartData) { item in
                                 BarMark(
                                     x: .value("Day", item.day),
-                                    y: .value("Calories", item.calories)
+                                    y: .value("Calories", animateChart ? item.calories : 0)
                                 )
                                 .foregroundStyle(
                                     LinearGradient(
@@ -124,12 +146,12 @@ struct ProfileView: View {
                                 )
                                 .cornerRadius(4)
                                 
-                                // Mockup Tooltip statis (di hari Selasa)
-                                if item.day == "Tue" {
+                                // Interactive Pop-up
+                                if let selectedDay = selectedDay, item.day == selectedDay {
                                     RuleMark(x: .value("Day", item.day))
-                                        .foregroundStyle(Color.clear)
+                                        .foregroundStyle(Color.gray.opacity(0.3))
                                         .annotation(position: .top) {
-                                            Text("1,200 cal")
+                                            Text("\(item.calories) cal")
                                                 .font(.caption).bold()
                                                 .padding(.horizontal, 8)
                                                 .padding(.vertical, 4)
@@ -145,9 +167,26 @@ struct ProfileView: View {
                                     AxisValueLabel()
                                 }
                             }
+                            // Interaktivitas (Tap & Scrubbing)
+                            .chartOverlay { proxy in
+                                GeometryReader { geometry in
+                                    Rectangle().fill(.clear).contentShape(Rectangle())
+                                        .gesture(
+                                            DragGesture(minimumDistance: 0)
+                                                .onChanged { value in
+                                                    let xLocation = value.location.x - geometry[proxy.plotFrame!].origin.x
+                                                    if let day: String = proxy.value(atX: xLocation) {
+                                                        selectedDay = day
+                                                    }
+                                                }
+                                                .onEnded { _ in
+                                                    selectedDay = nil
+                                                }
+                                        )
+                                }
+                            }
                         }
                         .padding(.horizontal, 24)
-                        .padding(.top, 16)
                         
                         // 5. Settings Menu
                         VStack(alignment: .leading, spacing: 16) {
@@ -175,19 +214,60 @@ struct ProfileView: View {
                         .padding(.horizontal, 24)
                         .padding(.vertical, 16)
                         
-                        // Memberi sedikit ruang kosong sebelum tab bar bawah
                         Spacer().frame(height: 20)
                     }
                     .background(
                         Color.white
-                            // Membuat sudut lengkung hanya di atas
                             .clipShape(UnevenRoundedRectangle(topLeadingRadius: 32, topTrailingRadius: 32))
                             .padding(.bottom, -1000)
-                            
                     )
                 }
             }
         }
+        // Animasi saat load pertama
+        .onAppear {
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                animateChart = true
+            }
+        }
+        // Animasi saat Picker diubah
+        .onChange(of: selectedTrend) {
+            animateChart = false
+            selectedDay = nil
+            
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.8).delay(0.1)) {
+                animateChart = true
+            }
+        }
+    }
+}
+
+// MARK: - Helper Algoritma
+extension ProfileView {
+    func calculateAverages(from rawData: [Int], daysPerGroup: Int, isBiWeekly: Bool = false) -> [DailyCalorie] {
+        var processedData: [DailyCalorie] = []
+        var groupIndex = 1
+        
+        for startIndex in stride(from: 0, to: rawData.count, by: daysPerGroup) {
+            let endIndex = min(startIndex + daysPerGroup, rawData.count)
+            let chunk = Array(rawData[startIndex..<endIndex])
+            
+            let totalCalories = chunk.reduce(0, +)
+            // Mencegah pembagian dengan 0 jika data kosong
+            let averageCalories = chunk.isEmpty ? 0 : totalCalories / chunk.count
+            
+            let label: String
+            if isBiWeekly {
+                label = "W\(groupIndex * 2 - 1)-\(groupIndex * 2)"
+            } else {
+                label = "W\(groupIndex)"
+            }
+            
+            processedData.append(DailyCalorie(day: label, calories: averageCalories))
+            groupIndex += 1
+        }
+        
+        return processedData
     }
 }
 
@@ -213,13 +293,11 @@ struct MetricItem: View {
             }
         }
         .frame(maxWidth: .infinity)
-        // HIG: Menggabungkan elemen agar VoiceOver membacanya sebagai kalimat utuh
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(title), \(value) \(unit == "cm" ? "centimeters" : unit == "kg" ? "kilograms" : "years")")
     }
 }
 
-// MARK: - Preview
 #Preview {
     ProfileView()
 }
