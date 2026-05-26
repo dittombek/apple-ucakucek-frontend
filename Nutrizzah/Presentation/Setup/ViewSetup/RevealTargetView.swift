@@ -50,7 +50,6 @@ struct RevealTargetView: View {
         ZStack {
             // Background & Aura (mengikuti custom background-mu di screenshot)
             darkBgGreen.ignoresSafeArea()
-            
             VStack {
                 Spacer()
                 
@@ -63,12 +62,11 @@ struct RevealTargetView: View {
                             .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
                     }
                 }
-                .frame(width: 320, height: 480)
+                .frame(width: 360, height: 440)
                 .background(Color(red: 0.95, green: 0.94, blue: 0.90))
-                .cornerRadius(24)
+                .cornerRadius(16)
                 .shadow(color: Color.white.opacity(cardGlow), radius: 50, x: 0, y: 0)
                 .shadow(color: .black.opacity(0.2), radius: 15, x: 0, y: 10)
-                
                 .offset(x: cardOffset)
                 .scaleEffect(cardScale)
                 .rotation3DEffect(
@@ -157,36 +155,88 @@ struct RevealTargetView: View {
 
 // MARK: - Komponen Sisi Depan
 struct CongratsCardFace: View {
+    @State private var showCircle1 = false
+    @State private var showCircle2 = false
+    @State private var showCircle3 = false
+    
     var body: some View {
-        VStack(spacing: 60) {
+        VStack(spacing: 40) {
             VStack {
                 Text("Congratulations!")
                     .font(.system(size: 28, weight: .bold, design: .serif))
                     .padding(.top, 40)
                 
-                Text("Tap to reveal your target!") // Dibuat lebih mengajak
+                Text("Tap to reveal your target!")
                     .font(.subheadline)
                     .fontWeight(.bold)
                     .foregroundColor(Color(red: 0.60, green: 0.68, blue: 0.48))
             }
             
-            // Mascot
+            // Mascot & Controlled Ripple Effect
             ZStack {
-                Circle().fill(Color.pink.opacity(0.2)).frame(width: 140)
-                Text("🍠").font(.system(size: 80))
+                // Lingkaran 3 (Luar)
+                Circle().fill(Color.matchaMecha200.opacity(0.2))
+                    .frame(height: 220)
+                    // Ukuran awal 0.5 agar pergerakan membesarnya lebih smooth dan tidak terlalu jauh
+                    .scaleEffect(showCircle3 ? 1.0 : 0.5)
+                    .opacity(showCircle3 ? 1.0 : 0.0)
+                
+                // Lingkaran 2 (Tengah)
+                Circle().fill(Color.matchaMecha300.opacity(0.2))
+                    .frame(height: 180)
+                    .scaleEffect(showCircle2 ? 1.0 : 0.5)
+                    .opacity(showCircle2 ? 1.0 : 0.0)
+                
+                // Lingkaran 1 (Dalam)
+                Circle().fill(Color.matchaMecha400.opacity(0.2))
+                    .frame(height: 140)
+                    .scaleEffect(showCircle1 ? 1.0 : 0.5)
+                    .opacity(showCircle1 ? 1.0 : 0.0)
+                    
+                Image("iconOnTapCard")
+            }
+            .task {
+                await runChoreography()
             }
             
-            Button(action: { print("Done di-tap") }) {
-                Text("Done")
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(Color.matchaMecha700)
-                    .clipShape(Capsule())
-            }
             .padding(.horizontal, 24)
             Spacer()
+        }
+    }
+    
+    // MARK: - Logic Koreografi Smooth
+    private func runChoreography() async {
+        while !Task.isCancelled {
+            
+            // STEP 0: Reset perlahan (Smooth fade out) agar tidak kaku saat mengulang
+            withAnimation(.easeInOut(duration: 0.8)) {
+                showCircle1 = false
+                showCircle2 = false
+                showCircle3 = false
+            }
+            // Tunggu sampai benar-benar memudar dan mengecil
+            try? await Task.sleep(nanoseconds: 800_000_000)
+            
+            // STEP 1: Munculkan Lingkaran 1 (Sangat halus dengan durasi 0.8 detik)
+            withAnimation(.easeInOut(duration: 0.8)) {
+                showCircle1 = true
+            }
+            // Biarkan mengembang setengah jalan (0.4 detik) sebelum memanggil yang kedua
+            try? await Task.sleep(nanoseconds: 400_000_000)
+            
+            // STEP 2: Munculkan Lingkaran 2
+            withAnimation(.easeInOut(duration: 0.8)) {
+                showCircle2 = true
+            }
+            try? await Task.sleep(nanoseconds: 400_000_000)
+            
+            // STEP 3: Munculkan Lingkaran 3
+            withAnimation(.easeInOut(duration: 0.8)) {
+                showCircle3 = true
+            }
+            
+            // STEP 4: Semuanya terbuka penuh, tahan posisi ini sejenak
+            try? await Task.sleep(nanoseconds: 1_500_000_000) // Tahan 1.5 detik
         }
     }
 }
@@ -219,32 +269,54 @@ struct DailyTargetCardFace: View {
             }
             .frame(width: 120, height: 120)
             
-            VStack(spacing: 12) {
-                MacroRow(title: "Carbs", value: "\(data.carbs)g", color: .orange, width: 0.8)
-                MacroRow(title: "Protein", value: "\(data.protein)g", color: .brown, width: 0.6)
-                MacroRow(title: "Fat", value: "\(data.fat)g", color: .yellow, width: 0.4)
-                MacroRow(title: "Vitamin", value: "\(data.vitamin)g", color: .pink, width: 0.5)
-                MacroRow(title: "Mineral", value: "\(data.mineral)g", color: .blue, width: 0.3)
+            // 👇 BAGIAN YANG DIUBAH
+            VStack(spacing: 14) {
+                // Menambahkan judul bagian agar persis seperti gambar referensi
+                Text("Nutritional facts")
+                    .font(.headline)
+                    .foregroundColor(.gray)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.bottom, 4)
+                
+                MacroRow(title: "Carbs", value: "\(data.carbs)g")
+                MacroRow(title: "Protein", value: "\(data.protein)g")
+                MacroRow(title: "Fat", value: "\(data.fat)g")
+                
+                // Karena data dummy vitamin/mineral bertipe Double, kita format agar tampil rapi
+                MacroRow(title: "Vitamin", value: String(format: "%.1f g", data.vitamin))
+                MacroRow(title: "Mineral", value: String(format: "%.0f g", data.mineral))
             }
-            .padding(.horizontal, 24)
+            .padding(.horizontal, 28)
             
             Spacer()
         }
+        // Background ditambahkan di sini agar tidak tembus pandang saat animasi flip
+        .background(Color(red: 0.95, green: 0.94, blue: 0.90))
+        .cornerRadius(16)
     }
 }
 
+// 👇 KOMPONEN MACROROW YANG BARU (Lebih Bersih dan Ringan)
 struct MacroRow: View {
-    let title: String; let value: String; let color: Color; let width: CGFloat
+    let title: String
+    let value: String
+    
     var body: some View {
         HStack {
-            Text(title).font(.footnote).frame(width: 50, alignment: .leading)
-            GeometryReader { geometry in
-                ZStack(alignment: .leading) {
-                    Capsule().frame(height: 6).foregroundColor(color.opacity(0.2))
-                    Capsule().frame(width: geometry.size.width * width, height: 6).foregroundColor(color)
-                }
-            }.frame(height: 6)
-            Text(value).font(.footnote).bold().frame(width: 55, alignment: .trailing)
+            Text(title)
+                .font(.subheadline)
+                .foregroundColor(.gray)
+            
+            // Garis tipis penghubung yang otomatis mengisi ruang kosong
+            Rectangle()
+                .fill(Color.gray.opacity(0.2))
+                .frame(height: 1)
+                .padding(.horizontal, 8)
+            
+            Text(value)
+                .font(.subheadline)
+                .fontWeight(.semibold)
+                .foregroundColor(Color.black.opacity(0.7))
         }
     }
 }
