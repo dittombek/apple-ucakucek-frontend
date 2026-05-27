@@ -9,6 +9,26 @@ import SwiftUI
 
 struct SetupView: View {
     @StateObject private var viewModel = SetupViewModel()
+    @State private var showRevealTarget = false // State pemicu
+    
+    private var isNextButtonDisabled: Bool {
+            if viewModel.isLoading { return true } // Disable saat loading
+            
+            switch viewModel.step {
+            case 1:
+                return viewModel.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            case 2:
+                return viewModel.gender.isEmpty
+            case 3:
+                return viewModel.age.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            case 4:
+                return viewModel.height.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            case 5:
+                return viewModel.weight.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            default:
+                return false // Step 0 (Intro) dan Step 6 (Photo) selalu valid dan bisa di-next
+            }
+        }
     
     var body: some View {
         VStack {
@@ -35,7 +55,13 @@ struct SetupView: View {
             
             Button(action: {
                 if viewModel.step == 6 {
-                    Task { await viewModel.createUser() }
+                    Task {
+                        await viewModel.createUser()
+                        // 👇 Cek apakah ID dan Target berhasil didapatkan
+                        if viewModel.newlyCreatedUserId != nil && viewModel.target != nil {
+                            showRevealTarget = true
+                        }
+                    }
                 } else {
                     withAnimation { viewModel.nextStep() }
                 }
@@ -49,10 +75,10 @@ struct SetupView: View {
                     }
                 }
                 .frame(maxWidth: .infinity).padding(.vertical, 16)
-                .background(Color.machaMecha400)
+                .background(isNextButtonDisabled ? Color.gray.opacity(0.5) : Color.machaMecha400)
                 .clipShape(Capsule())
             }
-            .disabled(viewModel.isLoading)
+            .disabled(isNextButtonDisabled)
             .padding(.horizontal, 24).padding(.bottom, 20)
             .shadow(color: .black.opacity(0.1), radius: 2, x: 4, y: 4)
             .alert("Error", isPresented: Binding(
@@ -69,9 +95,25 @@ struct SetupView: View {
             startPoint: .top,
             endPoint: .bottom
         ))
+        .fullScreenCover(isPresented: $showRevealTarget) {
+            if let target = viewModel.target, let newId = viewModel.newlyCreatedUserId {
+                
+                let nutritionData = NutritionTarget(
+                    calories: Int(target.calories),
+                    carbs: Int(target.carbs),
+                    protein: Int(target.protein),
+                    fat: Int(target.fat),
+                    vitamin: target.vitamin,
+                    mineral: target.mineral
+                )
+                
+                // Oper data nutrisi DAN userId barunya
+                RevealTargetView(targetData: nutritionData, newUserId: newId)
+            }
+        }
     }
 }
 
 #Preview {
-    SetupView(isSetupDone: .constant(false))
+    SetupView()
 }
