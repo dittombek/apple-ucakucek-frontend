@@ -10,8 +10,10 @@ import SwiftUI
 @main
 struct NutrizzahApp: App {
     init() {
-    UserDefaults.standard.removeObject(forKey: "isSetupDone")
-}
+        // DEV ONLY: langsung ke homepage dengan userId tertentu
+       UserDefaults.standard.set(1, forKey: "userId")
+       UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
+    }
 
     var body: some Scene {
         WindowGroup {
