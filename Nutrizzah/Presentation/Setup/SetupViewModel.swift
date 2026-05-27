@@ -19,6 +19,12 @@ class SetupViewModel: ObservableObject {
 
     @Published var isLoading = false
     @Published var errorMessage: String?
+    
+    @Published var target: UserTarget?
+    @Published var dailyTotal: DailyTotal = .empty
+        
+    // 👇 1. Tambahkan variabel penampung sementara
+    @Published var newlyCreatedUserId: Int? = nil
 
     private let userService = UserRemoteDataSource()
     @AppStorage("userId") private var userId = 0
@@ -44,8 +50,14 @@ class SetupViewModel: ObservableObject {
                 weight: Int(weight) ?? 0
             )
             let user = try await userService.createUser(request)
-            userId = user.id
-            hasSeenOnboarding = true
+            // 👇 2. Simpan ID ke variabel sementara, BUKAN ke AppStorage
+            self.newlyCreatedUserId = user.id
+                        
+            // 👇 3. Ambil target dari API (Sesuai pembahasan kita sebelumnya)
+            let fetchedTarget = try await userService.fetchUserTarget(userId: user.id)
+            self.target = fetchedTarget
+//            userId = user.id
+//            hasSeenOnboarding = true
         } catch {
             errorMessage = "Failed to save profile. Please try again.\n\(error.localizedDescription)"
         }

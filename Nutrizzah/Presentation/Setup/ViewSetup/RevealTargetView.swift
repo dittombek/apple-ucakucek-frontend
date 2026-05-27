@@ -27,7 +27,12 @@ struct NutritionTarget {
 
 // MARK: - Main View
 struct RevealTargetView: View {
-    let dummyData = NutritionTarget(calories: 1680, carbs: 216, protein: 87, fat: 58, vitamin: 131.7, mineral: 7932)
+    let targetData: NutritionTarget
+    let newUserId: Int // 👇 Terima ID baru dari SetupView
+        
+    // 👇 Panggil AppStorage di sini
+    @AppStorage("userId") private var appUserId = 0
+    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
     
     // State Animasi Kartu
     @State private var isFlipped = false
@@ -40,8 +45,28 @@ struct RevealTargetView: View {
     @State private var flashOpacity = 0.0
     @State private var cardGlow = 0.0
     
-    // 👇 STATE BARU KHUSUS UNTUK TOMBOL
     @State private var showDoneButton = false
+    
+    private var noteSourceString : AttributedString {
+        var string = AttributedString("Source Note: Calculated based on established health standards. Full methodology on Halodoc.")
+        
+        string.font = .caption
+        
+        if let boldRange = string.range(of: "Source Note:") {
+            string[boldRange].font = .caption.bold()
+        }
+        
+        if let underlineRange = string.range(of: "Halodoc.") {
+            string[underlineRange].underlineStyle = .single
+            
+            // 👇 TAMBAHKAN LINK DI SINI
+            if let url = URL(string: "https://www.halodoc.com/artikel/cara-menghitung-kebutuhan-kalori-harian-untuk-pria-dan-wanita") {
+                string[underlineRange].link = url
+            }
+        }
+        
+        return string
+    }
     
     let darkBgGreen = Color(red: 0.55, green: 0.65, blue: 0.45)
     let darkButtonGreen = Color(red: 0.20, green: 0.30, blue: 0.15)
@@ -58,15 +83,18 @@ struct RevealTargetView: View {
                     if flipDegrees < 90 {
                         CongratsCardFace()
                     } else {
-                        DailyTargetCardFace(data: dummyData)
+                        DailyTargetCardFace(data: targetData)
                             .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
                     }
                 }
                 .frame(width: 360, height: 440)
-                .background(Color(red: 0.95, green: 0.94, blue: 0.90))
-                .cornerRadius(16)
-                .shadow(color: Color.white.opacity(cardGlow), radius: 50, x: 0, y: 0)
-                .shadow(color: .black.opacity(0.2), radius: 15, x: 0, y: 10)
+                .background(Color.lightGreen)
+                .cornerRadius(12)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.white.opacity(0.6), lineWidth: 1.5)
+                )
+               
                 .offset(x: cardOffset)
                 .scaleEffect(cardScale)
                 .rotation3DEffect(
@@ -77,12 +105,40 @@ struct RevealTargetView: View {
                 .onTapGesture {
                     if !isFlipped { executeLegendaryAnimation() }
                 }
+        
                 
                 Spacer()
                 
                 // 👇 GUNAKAN STATE BARU DI SINI
                 if showDoneButton {
-                    Button(action: { print("Done di-tap") }) {
+                    
+                    HStack(alignment: .top) {
+                        Image(systemName: "info.circle")
+                            .font(.system(size: 20)) // Icon sedikit lebih besar
+                            .foregroundColor(Color.black.opacity(0.5)) // Warna abu-abu yang elegan
+                        
+                        Text(noteSourceString)
+                            .foregroundColor(Color.black.opacity(0.5))
+                            .lineSpacing(4)
+                    }
+                    .padding(16)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color.lightGreen)
+                    .cornerRadius(12)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.white.opacity(0.6), lineWidth: 1.5)
+                    )
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 70)
+                    
+                    Spacer()
+                    
+                    Button(action: {
+                        appUserId = newUserId
+                        hasSeenOnboarding = true
+                    }) {
                         Text("Done")
                             .font(.headline)
                             .foregroundColor(.white)
@@ -92,7 +148,7 @@ struct RevealTargetView: View {
                             .clipShape(Capsule())
                     }
                     .padding(.horizontal, 40)
-                    .padding(.bottom, 30)
+                    .padding(.bottom, 56)
                     // Animasi muncul dari bawah perlahan
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
@@ -166,7 +222,7 @@ struct CongratsCardFace: View {
                     .font(.system(size: 28, weight: .bold, design: .serif))
                     .padding(.top, 40)
                 
-                Text("Tap to reveal your target!")
+                Text("Tap to reveal your daily nutrient target!")
                     .font(.subheadline)
                     .fontWeight(.bold)
                     .foregroundColor(Color(red: 0.60, green: 0.68, blue: 0.48))
@@ -291,7 +347,6 @@ struct DailyTargetCardFace: View {
             Spacer()
         }
         // Background ditambahkan di sini agar tidak tembus pandang saat animasi flip
-        .background(Color(red: 0.95, green: 0.94, blue: 0.90))
         .cornerRadius(16)
     }
 }
@@ -323,5 +378,8 @@ struct MacroRow: View {
 
 // MARK: - PREVIEW
 #Preview {
-    RevealTargetView()
+    RevealTargetView(
+        targetData: NutritionTarget(calories: 1680, carbs: 216, protein: 87, fat: 58, vitamin: 131.7, mineral: 7932.0),
+        newUserId: 1
+    )
 }
