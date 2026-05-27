@@ -35,25 +35,34 @@ struct SetupView: View {
             
             Button(action: {
                 if viewModel.step == 6 {
-                    Task {
-                        do {
-                            try await viewModel.createUser()
-                        } catch {
-                            print("Failed to create user: \(error)")
-                        }
-                    }
+                    Task { await viewModel.createUser() }
                 } else {
                     withAnimation { viewModel.nextStep() }
                 }
             }) {
-                Text(viewModel.step == 0 ? "Get started" : viewModel.step == 6 ? "Finish" : "Next")
-                    .font(.headline).foregroundColor(.white)
-                    .frame(maxWidth: .infinity).padding(.vertical, 16)
-                    .background(Color.machaMecha400)
-                    .clipShape(Capsule())
+                Group {
+                    if viewModel.isLoading {
+                        ProgressView().tint(.white)
+                    } else {
+                        Text(viewModel.step == 0 ? "Get started" : viewModel.step == 6 ? "Finish" : "Next")
+                            .font(.headline).foregroundColor(.white)
+                    }
+                }
+                .frame(maxWidth: .infinity).padding(.vertical, 16)
+                .background(Color.machaMecha400)
+                .clipShape(Capsule())
             }
+            .disabled(viewModel.isLoading)
             .padding(.horizontal, 24).padding(.bottom, 20)
             .shadow(color: .black.opacity(0.1), radius: 2, x: 4, y: 4)
+            .alert("Error", isPresented: Binding(
+                get: { viewModel.errorMessage != nil },
+                set: { if !$0 { viewModel.errorMessage = nil } }
+            )) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(viewModel.errorMessage ?? "")
+            }
         }
         .background(LinearGradient(
             colors: [Color.white, Color.potOfCream400],

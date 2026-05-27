@@ -8,7 +8,7 @@
 import Foundation
 
 struct UserRemoteDataSource {
-    private let baseURL = "http://localhost:3000"
+    private let baseURL = AppConfig.baseURL
 
     func createUser(_ request: CreateUserRequest) async throws -> User {
         let url = URL(string: "\(baseURL)/users")!

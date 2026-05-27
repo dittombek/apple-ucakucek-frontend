@@ -8,11 +8,18 @@
 import SwiftUI
 
 struct AddView: View {
+    let initialMeal: String
+
+    init(initialMeal: String = "Lunch") {
+        self.initialMeal = initialMeal
+        self._selectedMeal = State(initialValue: initialMeal)
+    }
+
     @Environment(\.dismiss) private var dismiss
     @AppStorage("userId") private var userId = 0
     @State private var foodName = ""
     @State private var selectedPortion = "Small"
-    @State private var selectedMeal = "Lunch"
+    @State private var selectedMeal: String
     @State private var showFoodList = false
     @State private var addedFoods: [FoodItem] = []
     @State private var isSaving = false

@@ -167,10 +167,37 @@ struct HomeView: View {
                     
                     // MARK: — Meal Sections
                     VStack(spacing: 16) {
-                        MealRow(icon: "sunrise.fill", title: "Breakfast", foods: viewModel.foodLogs.filter { $0.meal == "Breakfast" })
-                        MealRow(icon: "sun.max.fill", title: "Lunch", foods: viewModel.foodLogs.filter { $0.meal == "Lunch" })
-                        MealRow(icon: "moon.fill", title: "Dinner", foods: viewModel.foodLogs.filter { $0.meal == "Dinner" })
-                        MealRow(icon: "leaf.fill", title: "Snack", foods: viewModel.foodLogs.filter { $0.meal == "Snack" })
+                        NavigationLink {
+                            MealDetailView(meal: "Breakfast", icon: "sunrise.fill", date: selectedDate)
+                        } label: {
+                            MealRow(icon: "sunrise.fill", title: "Breakfast", foods: viewModel.foodLogs.filter { $0.meal == "Breakfast" })
+                                .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+
+                        NavigationLink {
+                            MealDetailView(meal: "Lunch", icon: "sun.max.fill", date: selectedDate)
+                        } label: {
+                            MealRow(icon: "sun.max.fill", title: "Lunch", foods: viewModel.foodLogs.filter { $0.meal == "Lunch" })
+                                .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+
+                        NavigationLink {
+                            MealDetailView(meal: "Dinner", icon: "moon.fill", date: selectedDate)
+                        } label: {
+                            MealRow(icon: "moon.fill", title: "Dinner", foods: viewModel.foodLogs.filter { $0.meal == "Dinner" })
+                                .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+
+                        NavigationLink {
+                            MealDetailView(meal: "Snack", icon: "leaf.fill", date: selectedDate)
+                        } label: {
+                            MealRow(icon: "leaf.fill", title: "Snack", foods: viewModel.foodLogs.filter { $0.meal == "Snack" })
+                                .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
                     }
                     .background(
                         RoundedRectangle(cornerRadius: 14)
@@ -186,7 +213,7 @@ struct HomeView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         }
-        .task { await viewModel.load(for: selectedDate) }
+        .onAppear { Task { await viewModel.load(for: selectedDate) } }
         .onChange(of: selectedDate) { _, newDate in
             Task { await viewModel.load(for: newDate) }
         }

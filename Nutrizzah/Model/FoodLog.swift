@@ -18,11 +18,17 @@ struct NutritionLog: Codable, Identifiable {
     let fat: Double
     let vitamin: Double
     let mineral: Double
+    let imageUrl: String?
 }
 
 struct CreateFoodLogResponse: Codable {
     let foodLog: FoodLog
     let nutrition: NutritionLog
+}
+
+struct CalorieHistory: Codable {
+    let date: String
+    let calories: Double
 }
 
 struct FoodLogWithCalories: Codable, Identifiable {
@@ -32,6 +38,12 @@ struct FoodLogWithCalories: Codable, Identifiable {
     let meal: String
     let date: String
     let calories: Double
+    let carbs: Double
+    let protein: Double
+    let fat: Double
+    let vitamin: Double
+    let mineral: Double
+    let imageUrl: String?
 }
 
 struct CreateFoodLogRequest: Codable {
