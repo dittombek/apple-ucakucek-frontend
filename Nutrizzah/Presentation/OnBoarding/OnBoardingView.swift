@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 
 
@@ -25,6 +26,8 @@ struct OnboardingView: View {
     @State private var currentPage = 0
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
     @State private var splashTimer: Timer? = nil
+    
+    let timer = Timer.publish(every: 4, on: .main, in: .common).autoconnect()
 
     let pages: [OnboardingPage] = [
         OnboardingPage(
@@ -105,13 +108,14 @@ struct OnboardingView: View {
             }
             .padding(.horizontal, 32)
             Spacer()
+            
         }
     }
 
     // MARK: - Onboarding Content (halaman 1–3)
     var onboardingContent: some View {
         VStack(spacing: 0) {
-
+            
             // ── Top nav: Back + Skip (glass effect) ──
             HStack {
                 // Back button (disembunyikan di halaman pertama konten)
@@ -129,9 +133,9 @@ struct OnboardingView: View {
                     // Placeholder agar Skip tetap di kanan
                     Spacer().frame(width: 36, height: 36)
                 }
-
+                
                 Spacer()
-
+                
                 // Skip button
                 if currentPage < pages.count - 1 {
                     Button("Skip") {
@@ -148,33 +152,57 @@ struct OnboardingView: View {
             .padding(.horizontal, 24)
             .padding(.top, 16)
             .frame(height: 60)
-
-            // ── Ilustrasi (TabView, bisa digeser) ──
-            TabView(selection: $currentPage) {
-                ForEach(1..<pages.count, id: \.self) { index in
-                    OnboardingIllustrationView(page: pages[index])
+            
+            // ── Ilustrasi, Dots, dan Teks ──
+            // 👇 Menggunakan ZStack agar Teks ikut geser, tapi Dots tetap statis/diam
+            ZStack(alignment: .bottom) {
+                
+                // TabView sekarang berisi Gambar DAN Teks
+                TabView(selection: $currentPage) {
+                    ForEach(1..<pages.count, id: \.self) { index in
+                        VStack(spacing: 0) {
+                            // Gambar
+                            OnboardingIllustrationView(page: pages[index])
+                                .frame(maxHeight: .infinity)
+                            
+                            // Ruang kosong untuk ditempati oleh Dots
+                            Spacer().frame(height: 48)
+                            
+                            // Teks sekarang ada di dalam TabView agar ikut terswipe!
+                            OnboardingTextView(page: pages[index])
+                                .padding(.horizontal, 32)
+                                .frame(height: 160) // 👇 Tinggi tetap agar posisi tidak melompat-lompat antar halaman
+                                .padding(.bottom, 40)
+                        }
                         .tag(index)
+                    }
                 }
+                .tabViewStyle(.page(indexDisplayMode: .never))
+                .onReceive(timer) { _ in
+                    // Pastikan timer auto-swipe hanya jalan saat Splash Screen sudah lewat
+                    if currentPage > 0 {
+                        withAnimation {
+                            if currentPage < pages.count - 1 {
+                                // Jika belum mentok, geser ke kanan
+                                currentPage += 1
+                            } else {
+                                // Jika sudah mentok di akhir, balik ke halaman konten pertama (1), BUKAN 0
+                                currentPage = 1
+                            }
+                        }
+                    }
+                }
+                // Hapus animasi statis sebelumnya, biarkan TabView menggunakan swipe nativenya
+                
+                // 👇 Dots (PageIndicator) diletakkan DI LUAR TabView agar tidak ikut bergeser
+                PageIndicatorView(count: contentPages.count, currentIndex: contentIndex)
+                    .padding(.bottom, 160 + 40 + 16) // Posisikan tepat di ruang kosong (Spacer) di atas
+                
             }
-            .tabViewStyle(.page(indexDisplayMode: .never))
-            .animation(.easeInOut, value: currentPage)
             .frame(maxHeight: .infinity)
-
-            // ── Dots (center, tidak ikut geser) ──
-            PageIndicatorView(count: contentPages.count, currentIndex: contentIndex)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 20)
-
-            // ── Teks (center, tidak geser) ──
-            OnboardingTextView(page: pages[currentPage])
-                .padding(.horizontal, 32)
-                .animation(.easeInOut(duration: 0.3), value: currentPage)
-                .frame(maxWidth: .infinity)
-                .multilineTextAlignment(.center)
-                .padding(.bottom, 50)
-
+            
             Spacer().frame(height: 32)
-
+            
             // ── Tombol aksi ──
             actionButton
                 .padding(.horizontal, 24)

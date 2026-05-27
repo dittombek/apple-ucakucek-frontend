@@ -111,6 +111,10 @@ struct ProfileView: View {
                         .padding(.vertical, 16)
                         .background(Color(red: 0.95, green: 0.96, blue: 0.93))
                         .cornerRadius(16)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(Color.white.opacity(0.6), lineWidth: 1.5)
+                        )
                         .offset(y: -60)
                         .padding(.bottom, -40)
                         .padding(.horizontal, 24)

@@ -55,6 +55,10 @@ struct HomeView: View {
                     RoundedRectangle(cornerRadius: 12)
                         .fill(Color.veryLightGreen)
                 )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.white.opacity(0.6), lineWidth: 1.5)
+                )
                 .padding(.horizontal, 16)
                 
                 // MARK: — Daily Intake + Nutrition PageView
@@ -87,7 +91,8 @@ struct HomeView: View {
                             proteinGoal: viewModel.target?.mineral ?? 0,
                             fat: 0, fatGoal: 0,
                             labels: ("Vitamin", "Mineral", nil),
-                            units: ("mg", "mg", "mg")
+                            units: ("mg", "mg", "mg"),
+                            colors: (Color.pinkDrink200, Color.nightSnow200, nil)
                         )
                         .containerRelativeFrame(.horizontal)
                         .id(1)
@@ -261,7 +266,7 @@ struct DailyIntakeCard: View {
             Spacer()
             ZStack {
                 Circle()
-                    .stroke(Color(.systemGray5), lineWidth: 10)
+                    .stroke(ringColor.opacity(0.2), lineWidth: 10)
                     .frame(width: 90, height: 90)
                 Circle()
                     .trim(from: 0, to: CGFloat(progress))
@@ -276,6 +281,10 @@ struct DailyIntakeCard: View {
         .padding(24)
         .frame(maxWidth: .infinity, minHeight: 140)
         .background(RoundedRectangle(cornerRadius: 18).fill(bgColor))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.white.opacity(0.6), lineWidth: 1.5)
+        )
         .animation(.easeInOut(duration: 0.3), value: isOver)
     }
 }
@@ -290,13 +299,14 @@ struct MacroDetailCard: View {
     let fatGoal: Double
     var labels: (String, String, String?) = ("Carbs", "Protein", "Fat")
     var units: (String, String, String) = ("g", "g", "g")
+    var colors: (Color, Color, Color?) = (.mockOrange200, .redMull100, .flirtatilous200)
 
     var body: some View {
         HStack(spacing: 12) {
-            MacroCard(value: carbs, goal: carbsGoal, label: labels.0, unit: units.0)
-            MacroCard(value: protein, goal: proteinGoal, label: labels.1, unit: units.1)
-            if let thirdLabel = labels.2 {
-                MacroCard(value: fat, goal: fatGoal, label: thirdLabel, unit: units.2)
+            MacroCard(value: carbs, goal: carbsGoal, label: labels.0, unit: units.0, theme: colors.0)
+            MacroCard(value: protein, goal: proteinGoal, label: labels.1, unit: units.1, theme: colors.1)
+            if let thirdLabel = labels.2, let thirdColor = colors.2 {
+                MacroCard(value: fat, goal: fatGoal, label: thirdLabel, unit: units.2, theme: thirdColor)
             }
         }
         .padding(.horizontal, 4)
@@ -309,11 +319,17 @@ struct MacroCard: View {
     let goal: Double
     let label: String
     var unit: String = "g"
+    var theme: Color
 
     var isOver: Bool { goal > 0 && value > goal }
     var progress: Double { goal > 0 ? min(value / goal, 1.0) : 0 }
-    var ringColor: Color { isOver ? .darkGreen : .matchaGreen }
-
+    
+    var ringColor: Color { isOver ? .red : theme }
+    var bgColor: Color { if (value.isZero) {
+        .veryLightGreen }
+        else { theme.opacity(0.2) }
+    }
+    
     private func format(_ v: Double) -> String {
         let rounded = Int(v.rounded())
         if rounded == 0 && v > 0 { return String(format: "%.1f", v) }
@@ -347,7 +363,11 @@ struct MacroCard: View {
         .frame(maxWidth: .infinity)
         .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(Color(.secondarySystemGroupedBackground))
+                .fill(bgColor)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.white.opacity(0.6), lineWidth: 1.5)
         )
     }
 }
