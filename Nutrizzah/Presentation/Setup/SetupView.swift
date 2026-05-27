@@ -73,5 +73,5 @@ struct SetupView: View {
 }
 
 #Preview {
-    SetupView()
+    SetupView(isSetupDone: .constant(false))
 }
