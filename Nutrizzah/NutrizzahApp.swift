@@ -11,8 +11,8 @@ import SwiftUI
 struct NutrizzahApp: App {
     init() {
         // DEV ONLY: langsung ke homepage dengan userId tertentu
-       UserDefaults.standard.set(1, forKey: "userId")
-       UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
+//       UserDefaults.standard.set(1, forKey: "userId")
+//       UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
     }
 
     var body: some Scene {
