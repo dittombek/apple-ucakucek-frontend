@@ -10,14 +10,14 @@ struct HomeView: View {
     @State private var selectedDate: Date = .now
     @State private var nutritionPage: Int? = 0
     @State private var showDatePicker = false
-
+    
     var greetingText: String {
         let hour = Calendar.current.component(.hour, from: .now)
         if hour < 12 { return "Morning" }
         if hour < 17 { return "Afternoon" }
         return "Evening"
     }
-
+    
     var mealSuggestion: String {
         let hour = Calendar.current.component(.hour, from: .now)
         if hour < 10 { return "Ready to log breakfast?" }
@@ -25,21 +25,19 @@ struct HomeView: View {
         if hour < 18 { return "Ready to log dinner?" }
         return "Ready to log a snack?"
     }
-
+    
     var greetingIcon: String {
         let hour = Calendar.current.component(.hour, from: .now)
         if hour < 12 { return "sunrise.fill" }
         if hour < 17 { return "sun.max.fill" }
         return "moon.fill"
     }
-
+    
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
-            LinearGradient(
-                colors : [Color.white, Color.potOfCream400],
-                startPoint: .top,
-                endPoint: .bottomTrailing)
-
+            Color(.systemGroupedBackground)
+                .ignoresSafeArea()
+            
             VStack(spacing: 16) {
                 // MARK: — Greeting Banner
                 HStack(spacing: 10) {
@@ -57,10 +55,12 @@ struct HomeView: View {
                     RoundedRectangle(cornerRadius: 12)
                         .fill(Color.veryLightGreen)
                 )
-                .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.white.opacity(0.6), lineWidth: 1.5)
+                )
                 .padding(.horizontal, 16)
-                .padding(.top, 20)
-
+                
                 // MARK: — Daily Intake + Nutrition PageView
                 DailyIntakeCard(
                     consumed: viewModel.caloriesConsumed,
@@ -91,7 +91,8 @@ struct HomeView: View {
                             proteinGoal: viewModel.target?.mineral ?? 0,
                             fat: 0, fatGoal: 0,
                             labels: ("Vitamin", "Mineral", nil),
-                            units: ("mg", "mg", "mg")
+                            units: ("mg", "mg", "mg"),
+                            colors: (Color.pinkDrink200, Color.nightSnow200, nil)
                         )
                         .containerRelativeFrame(.horizontal)
                         .id(1)
@@ -101,7 +102,8 @@ struct HomeView: View {
                 .scrollTargetBehavior(.paging)
                 .scrollPosition(id: $nutritionPage)
                 .fixedSize(horizontal: false, vertical: true)
-
+                .padding(.horizontal, 16)
+                
                 // Page dots
                 HStack(spacing: 6) {
                     ForEach(0..<2, id: \.self) { i in
@@ -110,7 +112,7 @@ struct HomeView: View {
                             .foregroundColor((nutritionPage ?? 0) == i ? .darkGreen : Color(.systemGray4))
                     }
                 }
-
+                
                 VStack(spacing: 16) {
                     // MARK: — Date Navigation
                     HStack {
@@ -123,9 +125,9 @@ struct HomeView: View {
                         .frame(width: 36, height: 36)
                         .background(
                             RoundedRectangle(cornerRadius: 100)
-                                .fill(Color(.quaternarySystemFill))
+                                .fill(Color(.gray).opacity(0.15))
                         )
-
+                        
                         Button {
                             showDatePicker = true
                         } label: {
@@ -142,7 +144,7 @@ struct HomeView: View {
                             .frame(height: 36)
                             .background(
                                 RoundedRectangle(cornerRadius: 100)
-                                    .fill(Color(.quaternarySystemFill))
+                                    .fill(Color(.gray).opacity(0.15))
                             )
                         }
                         .sheet(isPresented: $showDatePicker) {
@@ -153,7 +155,7 @@ struct HomeView: View {
                                 .presentationDetents([.medium])
                                 .presentationBackground(.white)
                         }
-
+                        
                         Button {
                             selectedDate = Calendar.current.date(byAdding: .day, value: 1, to: selectedDate) ?? selectedDate
                         } label: {
@@ -163,12 +165,11 @@ struct HomeView: View {
                         .frame(width: 36, height: 36)
                         .background(
                             RoundedRectangle(cornerRadius: 100)
-                                .fill(Color(.quaternarySystemFill))
+                                .fill(Color(.gray).opacity(0.15))
                         )
                     }
                     .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
-
+                    
                     // MARK: — Meal Sections
                     VStack(spacing: 16) {
                         NavigationLink {
@@ -244,6 +245,7 @@ struct DailyIntakeCard: View {
     var displayValue: Int { isOver ? Int(consumed - goal) : Int(max(goal - consumed, 0)) }
 
     var ringColor: Color { isOver ? .darkGreen : .matchaGreen }
+    var bgColor: Color { isOver ? Color.pink.opacity(0.15) : Color.veryLightGreen }
     var textColor: Color { isOver ? Color(red: 0.6, green: 0.2, blue: 0.2) : .darkGreen }
 
     var body: some View {
@@ -264,29 +266,25 @@ struct DailyIntakeCard: View {
             Spacer()
             ZStack {
                 Circle()
-                    .stroke(Color(.tertiarySystemFill), lineWidth: 10)
-                    .frame(width: 96, height: 96)
+                    .stroke(ringColor.opacity(0.2), lineWidth: 10)
+                    .frame(width: 90, height: 90)
                 Circle()
                     .trim(from: 0, to: CGFloat(progress))
                     .stroke(ringColor, style: StrokeStyle(lineWidth: 10, lineCap: .round))
                     .rotationEffect(.degrees(-90))
-                    .frame(width: 96, height: 96)
+                    .frame(width: 90, height: 90)
                 Text("\(percentage)%")
-                    .font(.system(size: 20, weight: .semibold))
+                    .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(textColor)
             }
         }
         .padding(24)
         .frame(maxWidth: .infinity, minHeight: 140)
-        .background(
-            LinearGradient(
-                colors: [Color.matchaMecha50, Color.matchaMecha200],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
+        .background(RoundedRectangle(cornerRadius: 18).fill(bgColor))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.white.opacity(0.6), lineWidth: 1.5)
         )
-        .cornerRadius(16)
-        .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
         .animation(.easeInOut(duration: 0.3), value: isOver)
     }
 }
@@ -301,16 +299,17 @@ struct MacroDetailCard: View {
     let fatGoal: Double
     var labels: (String, String, String?) = ("Carbs", "Protein", "Fat")
     var units: (String, String, String) = ("g", "g", "g")
+    var colors: (Color, Color, Color?) = (.mockOrange200, .redMull100, .flirtatilous200)
 
     var body: some View {
         HStack(spacing: 12) {
-            MacroCard(value: carbs, goal: carbsGoal, label: labels.0, unit: units.0)
-            MacroCard(value: protein, goal: proteinGoal, label: labels.1, unit: units.1)
-            if let thirdLabel = labels.2 {
-                MacroCard(value: fat, goal: fatGoal, label: thirdLabel, unit: units.2)
+            MacroCard(value: carbs, goal: carbsGoal, label: labels.0, unit: units.0, theme: colors.0)
+            MacroCard(value: protein, goal: proteinGoal, label: labels.1, unit: units.1, theme: colors.1)
+            if let thirdLabel = labels.2, let thirdColor = colors.2 {
+                MacroCard(value: fat, goal: fatGoal, label: thirdLabel, unit: units.2, theme: thirdColor)
             }
         }
-        .padding(.horizontal, 16)
+        .padding(.horizontal, 4)
         .frame(maxWidth: .infinity, alignment: .center)
     }
 }
@@ -320,11 +319,17 @@ struct MacroCard: View {
     let goal: Double
     let label: String
     var unit: String = "g"
+    var theme: Color
 
     var isOver: Bool { goal > 0 && value > goal }
     var progress: Double { goal > 0 ? min(value / goal, 1.0) : 0 }
-    var ringColor: Color { isOver ? .darkGreen : .matchaGreen }
-
+    
+    var ringColor: Color { isOver ? .red : theme }
+    var bgColor: Color { if (value.isZero) {
+        .veryLightGreen }
+        else { theme.opacity(0.2) }
+    }
+    
     private func format(_ v: Double) -> String {
         let rounded = Int(v.rounded())
         if rounded == 0 && v > 0 { return String(format: "%.1f", v) }
@@ -332,40 +337,38 @@ struct MacroCard: View {
     }
 
     var body: some View {
-        VStack(spacing: 4) {
+        VStack(spacing: 10) {
             ZStack {
                 Circle()
-                    .stroke(Color(.tertiarySystemFill), lineWidth: 8)
+                    .stroke(Color(.systemGray5), lineWidth: 8)
                 Circle()
                     .trim(from: 0, to: CGFloat(progress))
                     .stroke(ringColor, style: StrokeStyle(lineWidth: 8, lineCap: .round))
                     .rotationEffect(.degrees(-90))
                 VStack(spacing: 2) {
                     Text(format(value))
-                        .font(.system(size: 24, weight: .semibold))
-                        .foregroundColor(.darkGreen)
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(isOver ? .darkGreen : .darkGreen)
                     Text("/\(format(goal))\(unit)")
-                        .font(.system(size: 14))
+                        .font(.system(size: 10))
                         .foregroundColor(.secondary)
                 }
             }
-            .frame(width: 86, height: 86)
+            .frame(width: 72, height: 72)
             Text(label)
-                .font(.system(size: 16, weight: .medium))
+                .font(.system(size: 14, weight: .medium))
                 .foregroundColor(.darkGreen)
-                .padding(.top, 8)
         }
         .padding(.vertical, 16)
         .frame(maxWidth: .infinity)
         .background(
-            LinearGradient(
-                colors: [Color.potOfCream300, Color.potOfCream400],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .cornerRadius(16)
+            RoundedRectangle(cornerRadius: 16)
+                .fill(bgColor)
         )
-        .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.white.opacity(0.6), lineWidth: 1.5)
+        )
     }
 }
 
@@ -381,9 +384,7 @@ struct MealRow: View {
                 Image(systemName: icon)
                     .font(.system(size: 18))
                     .foregroundColor(.matchaGreen)
-                    .padding(6)
-                    .background(Color.matchaMecha50.opacity(0.6))
-                    .cornerRadius(8)
+                    .frame(width: 32)
                 Text(title)
                     .font(.system(size: 16, weight: .medium))
                 Spacer()
@@ -396,9 +397,10 @@ struct MealRow: View {
                     .padding(.leading, 46)
             }
         }
-        .padding(12)
-        .overlay(RoundedRectangle(cornerRadius: 12)
-            .stroke(Color(.separator)))
+        .padding(.horizontal, 8)
+        .padding(.vertical, 10)
+        .overlay(RoundedRectangle(cornerRadius: 8)
+            .stroke(Color.gray.opacity(0.30), lineWidth: 1))
     }
 }
 
