@@ -61,17 +61,18 @@ struct ProfilePictureView: View {
             
             // MARK: - Confirmation Dialog (Apple HIG)
             .confirmationDialog("Choose Profile Picture", isPresented: $showActionSheet, titleVisibility: .visible) {
-                Button("Camera") {
-                    imageSourceType = .camera
-                    showImagePicker = true
-                }
+                 Button("Camera") {
+                  
+                 }
                 
                 Button("Photo Library") {
                     imageSourceType = .photoLibrary
                     showImagePicker = true
                 }
                 
-                Button("Cancel", role: .cancel) {}
+                Button("Cancel", role: .cancel) {
+                    
+                }
             }
             // MARK: - Menampilkan Image Picker
             .sheet(isPresented: $showImagePicker) {
