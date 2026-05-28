@@ -69,7 +69,7 @@ struct FoodDetailView: View {
                             colors: [.clear, .black.opacity(0.65)],
                             startPoint: .top, endPoint: .bottom
                         )
-                        .frame(height: 280)
+                        .frame(maxWidth: .infinity, maxHeight: 280)
 
                         // Back button
                         VStack {
@@ -96,6 +96,7 @@ struct FoodDetailView: View {
                             .padding(.horizontal, 20)
                             .padding(.bottom, 20)
                     }
+                    .frame(maxWidth: .infinity)
 
                     // Content card
                     VStack(alignment: .leading, spacing: 24) {

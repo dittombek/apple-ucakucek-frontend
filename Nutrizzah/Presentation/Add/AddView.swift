@@ -115,13 +115,13 @@ struct AddView: View {
                         ProgressView().tint(.white)
                             .padding(.horizontal, 16)
                             .padding(.vertical, 12)
-                            .background(Capsule().fill(Color.brown))
+                            .background(Capsule().fill(Color.matchaMecha200))
                     } else {
                         Text("Done")
                             .foregroundStyle(.white)
                             .padding(.horizontal, 16)
                             .padding(.vertical, 12)
-                            .background(Capsule().fill(Color.brown))
+                            .background(Capsule().fill(Color.matchaMecha600))
                     }
                 }
                 .disabled(isSaving || addedFoods.isEmpty)

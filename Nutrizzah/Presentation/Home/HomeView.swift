@@ -245,7 +245,6 @@ struct DailyIntakeCard: View {
     var displayValue: Int { isOver ? Int(consumed - goal) : Int(max(goal - consumed, 0)) }
 
     var ringColor: Color { isOver ? .darkGreen : .matchaGreen }
-    var bgColor: Color { isOver ? Color.pink.opacity(0.15) : Color.veryLightGreen }
     var textColor: Color { isOver ? Color(red: 0.6, green: 0.2, blue: 0.2) : .darkGreen }
 
     var body: some View {
@@ -280,7 +279,21 @@ struct DailyIntakeCard: View {
         }
         .padding(24)
         .frame(maxWidth: .infinity, minHeight: 140)
-        .background(RoundedRectangle(cornerRadius: 18).fill(bgColor))
+        .background(
+            Group {
+                if isOver {
+                    RoundedRectangle(cornerRadius: 18).fill(Color.pink.opacity(0.15))
+                } else if percentage == 0 {
+                    RoundedRectangle(cornerRadius: 16).fill(
+                        LinearGradient(colors: [.potOfCream300, .potOfCream400], startPoint: .topLeading, endPoint: .bottomTrailing)
+                    )
+                } else {
+                    RoundedRectangle(cornerRadius: 18).fill(
+                        LinearGradient(colors: [.matchaMecha50, .matchaMecha200], startPoint: .topLeading, endPoint: .bottomTrailing)
+                    )
+                }
+            }
+        )
         .overlay(
             RoundedRectangle(cornerRadius: 12)
                 .stroke(Color.white.opacity(0.6), lineWidth: 1.5)
@@ -307,6 +320,8 @@ struct MacroDetailCard: View {
             MacroCard(value: protein, goal: proteinGoal, label: labels.1, unit: units.1, theme: colors.1)
             if let thirdLabel = labels.2, let thirdColor = colors.2 {
                 MacroCard(value: fat, goal: fatGoal, label: thirdLabel, unit: units.2, theme: thirdColor)
+            } else {
+                Color.clear.frame(maxWidth: .infinity)
             }
         }
         .padding(.horizontal, 4)
@@ -362,8 +377,15 @@ struct MacroCard: View {
         .padding(.vertical, 16)
         .frame(maxWidth: .infinity)
         .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(bgColor)
+            Group {
+                if value.isZero {
+                    RoundedRectangle(cornerRadius: 16).fill(
+                        LinearGradient(colors: [.potOfCream300, .potOfCream400], startPoint: .topLeading, endPoint: .bottomTrailing)
+                    )
+                } else {
+                    RoundedRectangle(cornerRadius: 16).fill(theme.opacity(0.2))
+                }
+            }
         )
         .overlay(
             RoundedRectangle(cornerRadius: 12)
